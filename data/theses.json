@@ -1,0 +1,32 @@
+[
+    {
+        "student_id": "98123457",
+        "professor_id": "1002",
+        "title": "udfeovg",
+        "abstract": "ewjfnoi qkjsefhi nweoih",
+        "keywords": [
+            "eifj",
+            "fweouh",
+            "wcuih"
+        ],
+        "pdf_path": "data/archives/theses\\thesis_98123457_1756483622.pdf",
+        "first_page_path": "data/archives/images\\first_page_98123457_1756483622.jpg",
+        "last_page_path": "data/archives/images\\last_page_98123457_1756483622.jpg",
+        "year": 2025,
+        "semester": "second",
+        "defense_date": "2025-08-29 19:37:02",
+        "internal_evaluator": "1001",
+        "external_evaluator": "2001",
+        "attendees": [
+            "feuigfi",
+            "eour",
+            "uf4h39"
+        ],
+        "guidance_score": 13.0,
+        "internal_score": 12.0,
+        "external_score": 14.0,
+        "final_score": 13.0,
+        "defense_result": "defended",
+        "completion_date": "2025-08-29 20:52:45"
+    }
+]

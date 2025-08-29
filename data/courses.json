@@ -1,0 +1,26 @@
+[
+  {
+    "course_id": "thesis101",
+    "title": "پایان‌نامه کارشناسی",
+    "professor_id": "1001",
+    "year": 1403,
+    "semester": "second",
+    "capacity": 10,
+    "current_students": 0,
+    "resources": "راهنمای پایان‌نامه نویسی",
+    "sessions": 16,
+    "units": 4
+  },
+  {
+    "course_id": "thesis102",
+    "title": "پایان‌نامه کارشناسی ارشد",
+    "professor_id": "1002",
+    "year": 1403,
+    "semester": "second",
+    "capacity": 10,
+    "current_students": 0,
+    "resources": "راهنمای پیشرفته پایان‌نامه نویسی",
+    "sessions": 16,
+    "units": 4
+  }
+]

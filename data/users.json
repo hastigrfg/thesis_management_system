@@ -1,0 +1,46 @@
+[
+    {
+        "user_id": "98123456",
+        "name": "علی محمدی",
+        "password": "password123",
+        "role": "student"
+    },
+    {
+        "user_id": "98123457",
+        "name": "فاطمه احمدی",
+        "password": "password123",
+        "role": "student"
+    },
+    {
+        "user_id": "1001",
+        "name": "دکتر رضایی",
+        "password": "prof123",
+        "role": "professor",
+        "capacity_guidance": 5,
+        "capacity_evaluation": 10,
+        "current_guidance": 0,
+        "current_evaluation": 1
+    },
+    {
+        "user_id": "1002",
+        "name": "دکتر حسینی",
+        "password": "prof123",
+        "role": "professor",
+        "capacity_guidance": 5,
+        "capacity_evaluation": 10,
+        "current_guidance": 1,
+        "current_evaluation": 0
+    },
+    {
+        "user_id": "2001",
+        "name": "دکتر محمدی (داور خارجی)",
+        "password": "eval123",
+        "role": "external_evaluator"
+    },
+    {
+        "user_id": "2002",
+        "name": "دکتر احمدی (داور خارجی)",
+        "password": "eval123",
+        "role": "external_evaluator"
+    }
+]
