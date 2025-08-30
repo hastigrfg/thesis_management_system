@@ -369,6 +369,7 @@ class ThesisManagementSystem:
             print("لطفاً یک عدد وارد کنید!")
 
     def complete_defense(self):
+        """تکمیل فرآیند دفاع - فقط ثبت نمره استاد راهنما و اطلاعات پایه"""
         scheduled_defenses = self.professor_service.get_scheduled_defenses(self.current_user.user_id)
         
         if not scheduled_defenses:
@@ -386,16 +387,19 @@ class ThesisManagementSystem:
                 
                 print(f"\nتکمیل جلسه دفاع دانشجو {defense['student_id']}")
                 
-                # فقط اطلاعات کلی را بگیر
+                # فقط نمره استاد راهنما و اطلاعات پایه گرفته شود
+                guidance_score = float(input("نمره استاد راهنما: "))
                 attendees = input("حاضرین جلسه (با کاما جدا کنید): ").split(',')
                 defense_result = input("نتیجه دفاع (defended/redefense): ")
                 
-                # نمره استاد راهنما را جداگانه بگیر
-                guidance_score = float(input("نمره استاد راهنما: "))
-                
+                # نمرات داوران را None قرار دهید تا بعداً وارد شوند
                 success, message = self.professor_service.complete_defense_process(
-                    defense['student_id'], guidance_score, None, None,
-                    [a.strip() for a in attendees], defense_result
+                    defense['student_id'], 
+                    guidance_score, 
+                    None,  # نمره داور داخلی - بعداً وارد می‌شود
+                    None,  # نمره داور خارجی - بعداً وارد می‌شود
+                    [a.strip() for a in attendees], 
+                    defense_result
                 )
                 print(message)
             else:
@@ -457,25 +461,106 @@ class ThesisManagementSystem:
             return
         
         print(f"\nتعداد نتایج یافت شده: {len(results)}")
+        print("=" * 80)
+        
         for i, thesis in enumerate(results, 1):
-            print(f"\n{i}. عنوان: {thesis.get('title', 'نامشخص')}")
-            print(f"   نویسنده: {thesis.get('student_id', 'نامشخص')}")
-            print(f"   استاد راهنما: {thesis.get('professor_id', 'نامشخص')}")
-            print(f"   سال: {thesis.get('year', 'نامشخص')}")
-            print(f"   نمره نهایی: {thesis.get('final_score', 'ثبت نشده')}")
+            print(f"\n{i}. **عنوان:** {thesis.get('title', 'نامشخص')}")
+            print(f"   **نویسنده:** {thesis.get('student_id', 'نامشخص')}")
+            print(f"   **استاد راهنما:** {thesis.get('professor_id', 'نامشخص')}")
+            print(f"   **سال/نیمسال:** {thesis.get('year', 'نامشخص')} - {thesis.get('semester', 'نامشخص')}")
             
-            # نمایش گرید
+            # نمایش چکیده (حداکثر 150 کاراکتر)
+            abstract = thesis.get('abstract', '')
+            if abstract and len(abstract) > 150:
+                abstract = abstract[:150] + "..."
+            print(f"   **چکیده:** {abstract}")
+            
+            # نمایش کلمات کلیدی
+            keywords = thesis.get('keywords', [])
+            if keywords:
+                print(f"   **کلمات کلیدی:** {', '.join(keywords)}")
+            
+            # نمایش داوران
+            internal_eval = thesis.get('internal_evaluator', 'نامشخص')
+            external_eval = thesis.get('external_evaluator', 'نامشخص')
+            print(f"   **داوران:** داخلی: {internal_eval}, خارجی: {external_eval}")
+            
+            # نمایش نمره و گرید
             final_score = thesis.get('final_score')
-            if final_score is not None:
-                if final_score >= 17:
-                    grade = "الف"
-                elif final_score >= 14:
-                    grade = "ب"
-                elif final_score >= 12:
-                    grade = "ج"
-                else:
-                    grade = "د"
-                print(f"   گرید: {grade}") 
+            grade = self.search_service.get_grade(final_score)
+            print(f"   **نمره نهایی:** {final_score or 'ثبت نشده'} ({grade})")
+            
+            # نمایش لینک دانلود
+            pdf_path = thesis.get('pdf_path')
+            if pdf_path:
+                print(f"   **لینک دانلود:** {pdf_path}")
+            else:
+                print(f"   **لینک دانلود:** فایل موجود نیست")
+            
+            print("-" * 80)
+        
+        # امکان مشاهده جزئیات کامل یک پایان‌نامه
+        try:
+            choice = input("\nبرای مشاهده جزئیات کامل یک پایان‌نامه شماره آن را وارد کنید (یا Enter برای بازگشت): ")
+            if choice.strip():
+                choice_idx = int(choice) - 1
+                if 0 <= choice_idx < len(results):
+                    thesis = results[choice_idx]
+                    self.show_thesis_details(thesis)
+        except ValueError:
+            print("ورودی نامعتبر!")
+
+    def show_thesis_details(self, thesis):
+        """نمایش جزئیات کامل یک پایان‌نامه"""
+        print("\n" + "=" * 80)
+        print("جزئیات کامل پایان‌نامه")
+        print("=" * 80)
+        
+        print(f"**عنوان:** {thesis.get('title', 'نامشخص')}")
+        print(f"**نویسنده:** {thesis.get('student_id', 'نامشخص')}")
+        print(f"**استاد راهنما:** {thesis.get('professor_id', 'نامشخص')}")
+        print(f"**سال/نیمسال:** {thesis.get('year', 'نامشخص')} - {thesis.get('semester', 'نامشخص')}")
+        print(f"**تاریخ دفاع:** {thesis.get('defense_date', 'نامشخص')}")
+        
+        # داوران
+        internal_eval = thesis.get('internal_evaluator', 'نامشخص')
+        external_eval = thesis.get('external_evaluator', 'نامشخص')
+        print(f"**داور داخلی:** {internal_eval}")
+        print(f"**داور خارجی:** {external_eval}")
+        
+        # چکیده کامل
+        print(f"**چکیده:** {thesis.get('abstract', 'ثبت نشده')}")
+        
+        # کلمات کلیدی
+        keywords = thesis.get('keywords', [])
+        print(f"**کلمات کلیدی:** {', '.join(keywords) if keywords else 'ثبت نشده'}")
+        
+        # نمرات
+        guidance_score = thesis.get('guidance_score')
+        internal_score = thesis.get('internal_score')
+        external_score = thesis.get('external_score')
+        final_score = thesis.get('final_score')
+        grade = self.search_service.get_grade(final_score)
+        
+        print(f"**نمره استاد راهنما:** {guidance_score or 'ثبت نشده'}")
+        print(f"**نمره داور داخلی:** {internal_score or 'ثبت نشده'}")
+        print(f"**نمره داور خارجی:** {external_score or 'ثبت نشده'}")
+        print(f"**نمره نهایی:** {final_score or 'ثبت نشده'} ({grade})")
+        
+        # حاضرین جلسه
+        attendees = thesis.get('attendees', [])
+        print(f"**حاضرین جلسه:** {', '.join(attendees) if attendees else 'ثبت نشده'}")
+        
+        # لینک‌های فایل
+        pdf_path = thesis.get('pdf_path')
+        first_page = thesis.get('first_page_path')
+        last_page = thesis.get('last_page_path')
+        
+        print(f"**فایل PDF:** {pdf_path or 'موجود نیست'}")
+        print(f"**تصویر صفحه اول:** {first_page or 'موجود نیست'}")
+        print(f"**تصویر صفحه آخر:** {last_page or 'موجود نیست'}")
+        
+        print("=" * 80)
     def show_evaluator_menu(self):
         """منوی داور خارجی"""
         from services.evaluator_service import EvaluatorService

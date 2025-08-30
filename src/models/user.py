@@ -84,7 +84,7 @@ class Professor(User):
         }
 
 class ExternalEvaluator(User):
-    def __init__(self, user_id, name, password, capacity_evaluation=15, current_evaluation=0):
+    def __init__(self, user_id, name, password, capacity_evaluation=10, current_evaluation=0):  # تغییر از 15 به 10
         super().__init__(user_id, name, password)
         self.capacity_evaluation = capacity_evaluation
         self.current_evaluation = current_evaluation

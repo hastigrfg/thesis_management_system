@@ -27,6 +27,14 @@ class AuthService:
                         user_data.get("capacity_guidance", 5),
                         user_data.get("capacity_evaluation", 10)
                     )
+                elif user_data["role"] == "external_evaluator":
+                    users[user_data["user_id"]] = ExternalEvaluator(
+                        user_data["user_id"], 
+                        user_data["name"], 
+                        user_data["password"],
+                        user_data.get("capacity_evaluation", 10),  
+                        user_data.get("current_evaluation", 0)
+                    )    
             return users
         except FileNotFoundError:
             return {}
@@ -46,26 +54,39 @@ class AuthService:
         return False
     
     def save_users(self):
+        """ذخیره کاربران با تمام ویژگی‌هایشان"""
         users_data = []
         for user in self.users.values():
-            user_dict = {
-                "user_id": user.user_id,
-                "name": user.name,
-                "password": user.password,  # تغییر به password
-                "role": user.get_role()
-            }
-            if user.get_role() == "professor":
-                user_dict.update({
+            if user.get_role() == "student":
+                users_data.append({
+                    "user_id": user.user_id,
+                    "name": user.name,
+                    "password": user.password,
+                    "role": "student"
+                })
+            elif user.get_role() == "professor":
+                users_data.append({
+                    "user_id": user.user_id,
+                    "name": user.name,
+                    "password": user.password,
+                    "role": "professor",
                     "capacity_guidance": user.capacity_guidance,
                     "capacity_evaluation": user.capacity_evaluation,
                     "current_guidance": user.current_guidance,
                     "current_evaluation": user.current_evaluation
                 })
-            users_data.append(user_dict)
+            elif user.get_role() == "external_evaluator":
+                users_data.append({
+                    "user_id": user.user_id,
+                    "name": user.name,
+                    "password": user.password,
+                    "role": "external_evaluator",
+                    "capacity_evaluation": user.capacity_evaluation,
+                    "current_evaluation": user.current_evaluation
+                })
         
         with open(self.users_file, 'w', encoding='utf-8') as file:
             json.dump(users_data, file, ensure_ascii=False, indent=4)
-    
     def get_user(self, user_id):
         return self.users.get(user_id)
     def load_users(self):

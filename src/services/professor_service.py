@@ -202,18 +202,28 @@ class ProfessorService:
         except (FileNotFoundError, json.JSONDecodeError):
             return []
     def complete_defense_process(self, student_id, guidance_score, internal_score, external_score, 
-                            attendees, defense_result):
+                           attendees, defense_result):
+        """تکمیل فرآیند دفاع و ثبت نمرات"""
         try:
+            # اعتبارسنجی نمره استاد راهنما
+            if guidance_score is None:
+                return False, "نمره استاد راهنما باید وارد شود"
+            
+            try:
+                guidance_score = float(guidance_score)
+            except ValueError:
+                return False, "نمره استاد راهنما باید عددی باشد"
+
             # خواندن درخواست‌های دفاع
             with open(self.defense_requests_file, 'r', encoding='utf-8') as file:
                 defense_requests = json.load(file)
             
-            # ایجاد یا خواندن فایل theses.json
+            # خواندن پایان‌نامه‌ها
             try:
                 with open(self.theses_file, 'r', encoding='utf-8') as file:
                     theses = json.load(file)
             except (FileNotFoundError, json.JSONDecodeError):
-                theses = []  # اگر فایل وجود ندارد، لیست خالی ایجاد کن
+                theses = []
             
             # پیدا کردن درخواست دفاع
             defense_index = -1
@@ -242,23 +252,57 @@ class ProfessorService:
                 "defense_date": defense_data["defense_date"],
                 "internal_evaluator": defense_data["internal_evaluator"],
                 "external_evaluator": defense_data["external_evaluator"],
-                "attendees": attendees,
+                "attendees": [a.strip() for a in attendees if a.strip()],
                 "guidance_score": guidance_score,
-                "internal_score": internal_score,  # می‌تواند null باشد
-                "external_score": external_score,  # می‌تواند null باشد
-                "final_score": None,  # بعداً محاسبه می‌شود
-                "defense_result": defense_result,
-                "completion_date": get_current_date().strftime("%Y-%m-%d %H:%M:%S")
+                "internal_score": internal_score,
+                "external_score": external_score,
+                "completion_date": get_current_date().strftime("%Y-%m-%d %H:%M:%S"),
+                "defense_result": defense_result
             }
+            
+            # محاسبه نمره نهایی اگر همه نمرات موجود باشند
+            if (internal_score is not None and external_score is not None and
+                guidance_score is not None):
+                try:
+                    internal_score_float = float(internal_score)
+                    external_score_float = float(external_score)
+                    thesis_data["final_score"] = round((guidance_score + internal_score_float + external_score_float) / 3, 2)
+                except (ValueError, TypeError):
+                    thesis_data["final_score"] = None
+            else:
+                thesis_data["final_score"] = None
             
             # اضافه کردن به لیست پایان‌نامه‌ها
             theses.append(thesis_data)
             
-            # ذخیره در فایل
+            # به روز کردن وضعیت درخواست دفاع
+            defense_requests[defense_index]["status"] = "completed"
+            
+            # آزاد کردن ظرفیت اساتید
+            professor = self.auth_service.get_user(defense_data["professor_id"])
+            internal_evaluator = self.auth_service.get_user(defense_data["internal_evaluator"])
+            external_evaluator = self.auth_service.get_user(defense_data["external_evaluator"])
+            
+            if professor:
+                professor.current_guidance = max(0, professor.current_guidance - 1)
+            if internal_evaluator:
+                internal_evaluator.current_evaluation = max(0, internal_evaluator.current_evaluation - 1)
+            if external_evaluator:
+                external_evaluator.current_evaluation = max(0, external_evaluator.current_evaluation - 1)
+            
+            # ذخیره تغییرات
+            with open(self.defense_requests_file, 'w', encoding='utf-8') as file:
+                json.dump(defense_requests, file, ensure_ascii=False, indent=4)
+            
             with open(self.theses_file, 'w', encoding='utf-8') as file:
                 json.dump(theses, file, ensure_ascii=False, indent=4)
             
-            return True, "دفاع با موفقیت تکمیل و ثبت شد"
+            # ذخیره اطلاعات کاربران
+            self.auth_service.save_users()
+            
+            return True, "دفاع با موفقیت تکمیل و ثبت شد. نمرات داوران می‌توانند بعداً وارد شوند."
             
         except Exception as e:
+            import traceback
+            print(f"خطای کامل: {traceback.format_exc()}")
             return False, f"خطا در تکمیل دفاع: {str(e)}"

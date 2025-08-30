@@ -9,7 +9,9 @@ class SearchService:
     def load_theses(self):
         try:
             with open(self.theses_file, 'r', encoding='utf-8') as file:
-                return json.load(file)
+                theses_data = json.load(file)
+                # فقط پایان‌نامه‌های completed را برگردان
+                return [t for t in theses_data if t.get("defense_result") == "defended"]
         except (FileNotFoundError, json.JSONDecodeError):
             return []
     
@@ -22,24 +24,40 @@ class SearchService:
                       or query.lower() in t.get("abstract", "").lower()]
         
         if professor:
-            results = [t for t in results if professor.lower() in t.get("professor_id", "").lower()]
+            results = [t for t in results if str(professor) in str(t.get("professor_id", ""))]
         
         if keyword:
             results = [t for t in results 
                       if any(keyword.lower() in k.lower() for k in t.get("keywords", []))]
         
         if author:
-            results = [t for t in results if author.lower() in t.get("student_id", "").lower()]
+            results = [t for t in results if str(author) in str(t.get("student_id", ""))]
         
         if year:
             results = [t for t in results if t.get("year") == year]
         
         if evaluator:
             results = [t for t in results 
-                      if evaluator.lower() in t.get("internal_evaluator", "").lower()
-                      or evaluator.lower() in t.get("external_evaluator", "").lower()]
+                      if (str(evaluator) in str(t.get("internal_evaluator", "")) or 
+                          str(evaluator) in str(t.get("external_evaluator", "")))]
         
         return results
     
     def get_thesis_details(self, thesis_id):
-        return next((t for t in self.theses if t["student_id"] == thesis_id), None)
+        thesis = next((t for t in self.theses if t["student_id"] == thesis_id), None)
+        if thesis and thesis.get("defense_result") == "defended":
+            return thesis
+        return None
+    
+    def get_grade(self, final_score):
+        """تبدیل نمره به حروف الف/ب/ج/د"""
+        if final_score is None:
+            return "ثبت نشده"
+        if final_score >= 17:
+            return "الف"
+        elif final_score >= 14:
+            return "ب"
+        elif final_score >= 12:
+            return "ج"
+        else:
+            return "د"
