@@ -1,43 +1,23 @@
 [
     {
         "student_id": "98123457",
-        "professor_id": "1002",
-        "request_date": "2025-08-29 19:37:02",
-        "thesis_title": "udfeovg",
-        "abstract": "ewjfnoi qkjsefhi nweoih",
-        "keywords": [
-            "eifj",
-            "fweouh",
-            "wcuih"
-        ],
-        "pdf_path": "data/archives/theses\\thesis_98123457_1756483622.pdf",
-        "first_page_path": "data/archives/images\\first_page_98123457_1756483622.jpg",
-        "last_page_path": "data/archives/images\\last_page_98123457_1756483622.jpg",
-        "status": "scheduled",
-        "defense_date": "2025-08-29 19:37:02",
-        "internal_evaluator": "1001",
-        "external_evaluator": "2001",
-        "rejection_reason": null
-    },
-    {
-        "student_id": "98123456",
         "professor_id": "1001",
-        "request_date": "2025-08-29 23:36:12",
-        "thesis_title": "ubbfeo",
-        "abstract": "nep0irjgpmgrij rijk rgjieo9g irj",
+        "request_date": "2025-09-12 20:35:12",
+        "thesis_title": "wefub",
+        "abstract": "qwjsdnu wqfndhqoid qiwurnfiqo fqwoidnrhi",
         "keywords": [
-            "ufhweo3iug",
-            "eoghi8",
-            "g4u3hg8",
-            "ierbuiv"
+            "oqwinf",
+            "qfwoufju",
+            "qfwouunu",
+            "qwabufu"
         ],
-        "pdf_path": "data/archives/theses\\thesis_98123456_1756497972.pdf",
-        "first_page_path": "data/archives/images\\first_page_98123456_1756497972.jpg",
-        "last_page_path": "data/archives/images\\last_page_98123456_1756497972.jpg",
+        "pdf_path": "c:\\Users\\Ghost\\Documents\\thesis_management_system\\data\\archives\\theses\\thesis_98123457_1757696712.pdf",
+        "first_page_path": "c:\\Users\\Ghost\\Documents\\thesis_management_system\\data\\archives\\images\\first_page_98123457_1757696712.jpg",
+        "last_page_path": "c:\\Users\\Ghost\\Documents\\thesis_management_system\\data\\archives\\images\\last_page_98123457_1757696712.jpg",
         "status": "completed",
-        "defense_date": "2025-08-29 23:36:12",
+        "defense_date": "2025-05-12 00:00:00",
         "internal_evaluator": "1002",
-        "external_evaluator": "2002",
+        "external_evaluator": "2001",
         "rejection_reason": null
     }
 ]

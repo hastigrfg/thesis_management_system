@@ -41,20 +41,19 @@ class AuthService:
     
     def login(self, user_id, password):
         user = self.users.get(user_id)
-        if user and user.password == password:  # تغییر به password
+        if user and user.password == password:  
             return user
         return None
     
     def change_password(self, user_id, old_password, new_password):
         user = self.users.get(user_id)
-        if user and user.password == old_password:  # تغییر به password
-            user.password = new_password  # تغییر به password
+        if user and user.password == old_password:  
+            user.password = new_password  
             self.save_users()
             return True
         return False
     
     def save_users(self):
-        """ذخیره کاربران با تمام ویژگی‌هایشان"""
         users_data = []
         for user in self.users.values():
             if user.get_role() == "student":

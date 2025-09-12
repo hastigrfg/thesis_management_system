@@ -7,11 +7,11 @@ class EvaluatorService:
         self.theses_file = theses_file
     
     def get_theses_to_evaluate(self, professor_id):
-        """دریافت پایان‌نامه‌هایی که داور باید ارزیابی کند"""
+        
         theses_to_evaluate = []
         
         try:
-            # اول از theses.json بخوان
+            
             with open(self.theses_file, 'r', encoding='utf-8') as file:
                 theses = json.load(file)
             
@@ -25,7 +25,7 @@ class EvaluatorService:
         except (FileNotFoundError, json.JSONDecodeError):
             pass
         
-        # اگر در theses.json چیزی نیافت، از defense_requests.json بخوان
+        
         if not theses_to_evaluate:
             try:
                 with open("data/theses.jsons", 'r', encoding='utf-8') as file:
@@ -34,7 +34,7 @@ class EvaluatorService:
                 for request in theses.json:
                     if (request.get("external_evaluator") == professor_id and 
                         request.get("status") == "scheduled"):
-                        # تبدیل به فرمت thesis
+                       
                         thesis_data = {
                             "student_id": request["student_id"],
                             "professor_id": request["professor_id"],
@@ -52,7 +52,7 @@ class EvaluatorService:
         return theses_to_evaluate
 
     def submit_evaluation(self, student_id, professor_id, score):
-        """ثبت نمره توسط داور (داخلی یا خارجی)"""
+        
         try:
             with open(self.theses_file, 'r', encoding='utf-8') as file:
                 theses = json.load(file)
@@ -69,7 +69,7 @@ class EvaluatorService:
             thesis = theses[thesis_index]
             evaluator_type = None
             
-            # تشخیص نوع داور و ثبت نمره
+          
             if thesis.get("internal_evaluator") == professor_id:
                 if thesis.get("internal_score") is not None:
                     return False, "شما قبلاً نمره این پایان‌نامه را ثبت کرده‌اید"
@@ -83,10 +83,10 @@ class EvaluatorService:
             else:
                 return False, "شما داور این پایان‌نامه نیستید"
             
-            # نمایش اطلاعات داور
+            
             print(f"شما به عنوان داور {evaluator_type} این پایان‌نامه هستید")
             
-            # بررسی اگر همه نمرات ثبت شده‌اند
+           
             self._calculate_final_score_if_ready(theses[thesis_index])
             
             with open(self.theses_file, 'w', encoding='utf-8') as file:
@@ -99,7 +99,7 @@ class EvaluatorService:
         
     
     def _calculate_final_score_if_ready(self, thesis):
-        """محاسبه نمره نهایی اگر همه نمرات آماده باشند"""
+        
         if (thesis.get("guidance_score") is not None and
             thesis.get("internal_score") is not None and
             thesis.get("external_score") is not None):
@@ -110,7 +110,7 @@ class EvaluatorService:
             
             thesis["final_score"] = round((guidance + internal + external) / 3, 2)
             
-            # تعیین نتیجه دفاع
+           
             if thesis["final_score"] >= 12:
                 thesis["defense_result"] = "defended"
             else:
@@ -119,7 +119,7 @@ class EvaluatorService:
             thesis["completion_date"] = get_current_date().strftime("%Y-%m-%d %H:%M:%S")
 
     def evaluate_as_internal_evaluator(self, evaluator_service):
-        """ثبت نمره به عنوان داور داخلی"""
+        
         theses_to_evaluate = evaluator_service.get_internal_theses_to_evaluate(self.current_user.user_id)
         
         if not theses_to_evaluate:
@@ -153,7 +153,7 @@ class EvaluatorService:
         except ValueError:
             print("لطفاً یک عدد وارد کنید!")
     def get_internal_theses_to_evaluate(self, professor_id):
-        """دریافت پایان‌نامه‌هایی که کاربر به عنوان داور داخلی باید ارزیابی کند"""
+       
         try:
             with open(self.theses_file, 'r', encoding='utf-8') as file:
                 theses = json.load(file)
@@ -171,7 +171,7 @@ class EvaluatorService:
             return []
 
     def submit_internal_evaluation(self, student_id, professor_id, score):
-        """ثبت نمره توسط داور داخلی"""
+       
         try:
             with open(self.theses_file, 'r', encoding='utf-8') as file:
                 theses = json.load(file)
@@ -185,18 +185,18 @@ class EvaluatorService:
             if thesis_index == -1:
                 return False, "پایان‌نامه یافت نشد"
             
-            # بررسی آیا این کاربر واقعاً داور داخلی این پایان‌نامه است
+            
             if theses[thesis_index].get("internal_evaluator") != professor_id:
                 return False, "شما داور داخلی این پایان‌نامه نیستید"
             
-            # بررسی آیا قبلاً نمره داده است
+           
             if theses[thesis_index].get("internal_score") is not None:
                 return False, "شما قبلاً نمره این پایان‌نامه را ثبت کرده‌اید"
             
-            # ثبت نمره
+           
             theses[thesis_index]["internal_score"] = score
             
-            # اگر همه نمرات ثبت شده‌اند، نمره نهایی را محاسبه کن
+           
             self._calculate_final_score_if_ready(theses[thesis_index])
             
             with open(self.theses_file, 'w', encoding='utf-8') as file:

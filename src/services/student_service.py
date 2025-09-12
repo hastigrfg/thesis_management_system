@@ -17,6 +17,60 @@ class StudentService:
         self.defense_requests = self.load_defense_requests()
         self.courses = self.load_courses()
     
+    def load_courses(self):
+        try:
+            with open(self.courses_file, 'r', encoding='utf-8') as file:
+                courses_data = json.load(file)
+                from ..models.course import Course
+                return [Course.from_dict(data) for data in courses_data]
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+    def save_courses(self):
+        courses_data = [course.to_dict() for course in self.courses]
+        with open(self.courses_file, 'w', encoding='utf-8') as file:
+            json.dump(courses_data, file, ensure_ascii=False, indent=4)
+    def request_thesis_course(self, student_id, course_id):
+        try:
+           
+            for request in self.thesis_requests:
+                if request.student_id == student_id and request.course_id == course_id:
+                    return False, "شما قبلاً برای این درس درخواست داده‌اید"
+            
+            
+            course = None
+            course_index = -1
+            for i, c in enumerate(self.courses):
+                if c.course_id == course_id:
+                    course = c
+                    course_index = i
+                    break
+            
+            if not course:
+                return False, "درس مورد نظر یافت نشد"
+            
+            
+            if not course.has_capacity():
+                return False, "این درس ظرفیت ندارد"
+            
+            
+            if not course.add_student():
+                return False, "ظرفیت درس تکمیل است"
+            
+            
+            new_request = ThesisRequest(
+                student_id=student_id,
+                course_id=course_id,
+                professor_id=course.professor_id
+            )
+            
+            self.thesis_requests.append(new_request)
+            self.save_thesis_requests()
+            self.save_courses() 
+            
+            return True, "درخواست با موفقیت ثبت شد و در انتظار تایید استاد است"
+            
+        except Exception as e:
+            return False, f"خطا در ثبت درخواست: {str(e)}"
     def load_thesis_requests(self):
         try:
             with open(self.thesis_requests_file, 'r', encoding='utf-8') as file:
@@ -33,7 +87,7 @@ class StudentService:
         except (FileNotFoundError, json.JSONDecodeError):
             return []
     
-    def load_courses(self):
+    def ourses(self):
         try:
             with open(self.courses_file, 'r', encoding='utf-8') as file:
                 courses_data = json.load(file)
@@ -52,48 +106,80 @@ class StudentService:
             json.dump(requests_data, file, ensure_ascii=False, indent=4)
     
     def get_available_courses(self):
-        available_courses = []
-        for course in self.courses:
-            if course["current_students"] < course["capacity"]:
-                professor = self.auth_service.get_user(course["professor_id"])
-                course_data = course.copy()
-                course_data["professor_name"] = professor.name if professor else "نامشخص"
-                available_courses.append(course_data)
-        return available_courses
-    
+        
+        try:
+            available_courses = []
+            for course in self.courses:
+                if course.has_capacity():  
+                    
+                    professor = self.auth_service.get_user(course.professor_id)
+                    course_data = {
+                        "course_id": course.course_id,
+                        "title": course.title,
+                        "professor_id": course.professor_id,
+                        "professor_name": professor.name if professor else "نامشخص",
+                        "year": course.year,
+                        "semester": course.semester,
+                        "capacity": course.capacity,
+                        "current_students": course.current_students,
+                        "resources": course.resources,
+                        "sessions": course.sessions,
+                        "units": course.units
+                    }
+                    available_courses.append(course_data)
+            return available_courses
+        except Exception as e:
+            print(f"Unexpected error processing course: {e}")
+            return []
     def request_thesis_course(self, student_id, course_id):
-        # بررسی وجود درخواست قبلی
-        for request in self.thesis_requests:
-            if request.student_id == student_id and request.course_id == course_id:
-                return False, "شما قبلاً برای این درس درخواست داده‌اید"
         
-        # بررسی وجود درس
-        course = next((c for c in self.courses if c["course_id"] == course_id), None)
-        if not course:
-            return False, "درس مورد نظر یافت نشد"
-        
-        # بررسی ظرفیت درس
-        if course["current_students"] >= course["capacity"]:
-            return False, "این درس ظرفیت ندارد"
-        
-        # ایجاد درخواست جدید
-        new_request = ThesisRequest(
-            student_id=student_id,
-            course_id=course_id,
-            professor_id=course["professor_id"]
-        )
-        
-        self.thesis_requests.append(new_request)
-        self.save_thesis_requests()
-        return True, "درخواست با موفقیت ثبت شد و در انتظار تایید استاد است"
-    
+        try:
+            
+            for request in self.thesis_requests:
+                if request.student_id == student_id and request.course_id == course_id:
+                    return False, "شما قبلاً برای این درس درخواست داده‌اید"
+            
+           
+            course = None
+            for c in self.courses:
+                if c.course_id == course_id:
+                    course = c
+                    break
+            
+            if not course:
+                return False, "درس مورد نظر یافت نشد"
+            
+            
+            if not course.has_capacity():
+                return False, "این درس ظرفیت ندارد"
+            
+           
+            if not course.add_student():
+                return False, "ظرفیت درس تکمیل است"
+            
+            
+            new_request = ThesisRequest(
+                student_id=student_id,
+                course_id=course_id,
+                professor_id=course.professor_id
+            )
+            
+            self.thesis_requests.append(new_request)
+            self.save_thesis_requests()
+            self.save_courses() 
+            
+            return True, "درخواست با موفقیت ثبت شد و در انتظار تایید استاد است"
+            
+        except Exception as e:
+            print(f"Unexpected error processing course: {e}")
+            return False, f"خطا در ثبت درخواست: {str(e)}"
     def get_thesis_status(self, student_id):
-        """دریافت وضعیت درخواست‌های دانشجو از فایل"""
+       
         try:
             with open(self.thesis_requests_file, 'r', encoding='utf-8') as file:
                 requests_data = json.load(file)
             
-            # فیلتر کردن درخواست‌های دانشجوی فعلی
+            
             student_requests = []
             for data in requests_data:
                 if str(data.get("student_id")) == str(student_id):
@@ -104,18 +190,18 @@ class StudentService:
             return []
         
     def can_request_defense(self, student_id):
-        # بررسی وجود پایان‌نامه تأیید شده
+       
         thesis_request = next((r for r in self.thesis_requests 
                               if r.student_id == student_id and r.status == "approved"), None)
         
         if not thesis_request:
             return False, "شما هیچ پایان‌نامه تأیید شده‌ای ندارید"
         
-        # بررسی اینکه 3 ماه از تأیید گذشته است
+        
         if months_diff(thesis_request.approval_date, get_current_date()) < MIN_MONTHS_BEFORE_DEFENSE:
             return False, f"حداقل باید {MIN_MONTHS_BEFORE_DEFENSE} ماه از تأیید پایان‌نامه گذشته باشد"
         
-        # بررسی وجود درخواست دفاع قبلی
+        
         defense_request = next((r for r in self.defense_requests 
                                if r.student_id == student_id and r.status != "rejected"), None)
         
@@ -131,16 +217,16 @@ class StudentService:
         return True, "می‌توانید درخواست دفاع دهید"
     
     def request_defense(self, student_id, thesis_data, pdf_file_path, first_page_img_path, last_page_img_path):
-        # بررسی امکان درخواست دفاع
+        
         can_request, message = self.can_request_defense(student_id)
         if not can_request:
             return False, message
         
-        # یافتن درخواست پایان‌نامه تأیید شده
+        
         thesis_request = next((r for r in self.thesis_requests 
                               if r.student_id == student_id and r.status == "approved"), None)
         
-        # ایجاد درخواست دفاع
+       
         new_defense_request = DefenseRequest(
             student_id=student_id,
             professor_id=thesis_request.professor_id,

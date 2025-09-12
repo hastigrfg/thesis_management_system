@@ -1,33 +1,33 @@
 [
     {
-        "student_id": "98123456",
+        "student_id": "98123457",
         "professor_id": "1001",
-        "title": "ubbfeo",
-        "abstract": "nep0irjgpmgrij rijk rgjieo9g irj",
+        "title": "wefub",
+        "abstract": "qwjsdnu wqfndhqoid qiwurnfiqo fqwoidnrhi",
         "keywords": [
-            "ufhweo3iug",
-            "eoghi8",
-            "g4u3hg8",
-            "ierbuiv"
+            "oqwinf",
+            "qfwoufju",
+            "qfwouunu",
+            "qwabufu"
         ],
-        "pdf_path": "data/archives/theses\\thesis_98123456_1756497972.pdf",
-        "first_page_path": "data/archives/images\\first_page_98123456_1756497972.jpg",
-        "last_page_path": "data/archives/images\\last_page_98123456_1756497972.jpg",
+        "pdf_path": "c:\\Users\\Ghost\\Documents\\thesis_management_system\\data\\archives\\theses\\thesis_98123457_1757696712.pdf",
+        "first_page_path": "c:\\Users\\Ghost\\Documents\\thesis_management_system\\data\\archives\\images\\first_page_98123457_1757696712.jpg",
+        "last_page_path": "c:\\Users\\Ghost\\Documents\\thesis_management_system\\data\\archives\\images\\last_page_98123457_1757696712.jpg",
         "year": 2025,
         "semester": "second",
-        "defense_date": "2025-08-29 23:36:12",
+        "defense_date": "2025-05-12",
         "internal_evaluator": "1002",
-        "external_evaluator": "2002",
+        "external_evaluator": "2001",
         "attendees": [
-            "oiwinf",
-            "wcnhii",
-            "wiefj"
+            "rahnama",
+            "dakheli",
+            "kharji"
         ],
-        "guidance_score": 14.0,
-        "internal_score": 14.0,
+        "guidance_score": 13.0,
+        "internal_score": 13.0,
         "external_score": 15.0,
-        "completion_date": "2025-08-30 00:11:37",
+        "completion_date": "2025-09-12 22:11:59",
         "defense_result": "defended",
-        "final_score": 14.33
+        "final_score": 13.67
     }
 ]

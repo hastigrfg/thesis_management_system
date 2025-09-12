@@ -10,7 +10,6 @@ class SearchService:
         try:
             with open(self.theses_file, 'r', encoding='utf-8') as file:
                 theses_data = json.load(file)
-                # فقط پایان‌نامه‌های completed را برگردان
                 return [t for t in theses_data if t.get("defense_result") == "defended"]
         except (FileNotFoundError, json.JSONDecodeError):
             return []
@@ -50,7 +49,6 @@ class SearchService:
         return None
     
     def get_grade(self, final_score):
-        """تبدیل نمره به حروف الف/ب/ج/د"""
         if final_score is None:
             return "ثبت نشده"
         if final_score >= 17:

@@ -40,3 +40,18 @@ class Course:
             "sessions": self.sessions,
             "units": self.units
         }
+    
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data["course_id"],
+            data["title"],
+            data["professor_id"],
+            data["year"],
+            data["semester"],
+            data["capacity"],
+            data.get("resources", ""),
+            data.get("sessions", 0),
+            data.get("units", 0),
+            data.get("current_students", 0)
+        )

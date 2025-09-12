@@ -3,13 +3,15 @@
         "user_id": "98123456",
         "name": "علی محمدی",
         "password": "password123",
-        "role": "student"
+        "role": "student",
+        "email": "98123456@university.ac.ir"
     },
     {
         "user_id": "98123457",
         "name": "فاطمه احمدی",
         "password": "password123",
-        "role": "student"
+        "role": "student",
+        "email": "98123457@university.ac.ir"
     },
     {
         "user_id": "1001",
@@ -19,7 +21,8 @@
         "capacity_guidance": 5,
         "capacity_evaluation": 10,
         "current_guidance": 0,
-        "current_evaluation": 0
+        "current_evaluation": 0,
+        "email": "dr.rezaei@university.ac.ir"
     },
     {
         "user_id": "1002",
@@ -29,7 +32,8 @@
         "capacity_guidance": 5,
         "capacity_evaluation": 10,
         "current_guidance": 0,
-        "current_evaluation": 0
+        "current_evaluation": 0,
+        "email": "dr.hosseini@university.ac.ir"
     },
     {
         "user_id": "2001",
@@ -37,7 +41,8 @@
         "password": "eval123",
         "role": "external_evaluator",
         "capacity_evaluation": 10,
-        "current_evaluation": 0
+        "current_evaluation": 0,
+        "email": "dr.mohammadi@external.ac.ir"
     },
     {
         "user_id": "2002",
@@ -45,6 +50,7 @@
         "password": "eval123",
         "role": "external_evaluator",
         "capacity_evaluation": 10,
-        "current_evaluation": 0
+        "current_evaluation": 0,
+        "email": "dr.ahmadi@external.ac.ir"
     }
 ]

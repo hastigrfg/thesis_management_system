@@ -16,12 +16,12 @@ class ProfessorService:
         self.student_service = StudentService()
     
     def get_thesis_requests(self, professor_id):
-        """مستقیماً از فایل بخوانیم و فیلتر کنیم - راه مطمئن"""
+        
         try:
             with open(self.thesis_requests_file, 'r', encoding='utf-8') as file:
                 requests_data = json.load(file)
                 
-            # فیلتر کردن درخواست‌های مربوط به استاد فعلی
+            
             professor_requests = []
             for data in requests_data:
                 if (str(data.get("professor_id")) == str(professor_id) and 
@@ -33,7 +33,7 @@ class ProfessorService:
             return []
     
     def get_defense_requests(self, professor_id):
-        """دریافت درخواست‌های دفاع مربوط به استاد"""
+        
         try:
             with open(self.defense_requests_file, 'r', encoding='utf-8') as file:
                 requests_data = json.load(file)
@@ -49,13 +49,13 @@ class ProfessorService:
             return []
     
     def process_thesis_request(self, student_id, professor_id, approve, rejection_reason=None):
-        """پردازش درخواست پایان‌نامه - نسخه ساده و مطمئن"""
+        
         try:
-            # خواندن همه درخواست‌ها
+           
             with open(self.thesis_requests_file, 'r', encoding='utf-8') as file:
                 requests_data = json.load(file)
             
-            # پیدا کردن درخواست
+            
             request_index = -1
             for i, data in enumerate(requests_data):
                 if (str(data.get("student_id")) == str(student_id) and 
@@ -67,36 +67,36 @@ class ProfessorService:
             if request_index == -1:
                 return False, "درخواست یافت نشد"
             
-            # بررسی ظرفیت استاد
+           
             professor = self.auth_service.get_user(professor_id)
             if not professor:
                 return False, "استاد راهنما یافت نشد"
             
             if approve:
-                # بررسی ظرفیت
+               
                 if professor.current_guidance >= professor.capacity_guidance:
                     return False, "ظرفیت استاد راهنمایی تکمیل است"
                 
-                # تأیید درخواست
+               
                 requests_data[request_index]["status"] = "approved"
                 requests_data[request_index]["approval_date"] = get_current_date().strftime("%Y-%m-%d %H:%M:%S")
                 requests_data[request_index]["rejection_reason"] = None
                 
-                # افزایش ظرفیت استاد
+                
                 professor.current_guidance += 1
                 message = "درخواست پایان‌نامه تأیید شد"
             else:
-                # رد درخواست
+                
                 requests_data[request_index]["status"] = "rejected"
                 requests_data[request_index]["approval_date"] = None
                 requests_data[request_index]["rejection_reason"] = rejection_reason
                 message = "درخواست پایان‌نامه رد شد"
             
-            # ذخیره تغییرات
+            
             with open(self.thesis_requests_file, 'w', encoding='utf-8') as file:
                 json.dump(requests_data, file, ensure_ascii=False, indent=4)
             
-            # ذخیره اطلاعات استاد
+        
             self.auth_service.save_users()
             
             return True, message
@@ -106,21 +106,21 @@ class ProfessorService:
     
     def process_defense_request(self, student_id, professor_id, approve, defense_date=None, 
                            internal_evaluator=None, external_evaluator=None, rejection_reason=None):
-        """پردازش درخواست دفاع - نسخه ساده و مطمئن"""
+       
         
         try:
-            # بررسی که استاد راهنما نتواند داور باشد - اینجا اضافه شود
+            
             if internal_evaluator == professor_id:
                 return False, "استاد راهنما نمی‌تواند داور داخلی باشد"
             
             if external_evaluator == professor_id:
                 return False, "استاد راهنما نمی‌تواند داور خارجی باشد"
             
-            # خواندن همه درخواست‌ها
+            
             with open(self.defense_requests_file, 'r', encoding='utf-8') as file:
                 requests_data = json.load(file)
             
-            # پیدا کردن درخواست
+            
             request_index = -1
             for i, data in enumerate(requests_data):
                 if (str(data.get("student_id")) == str(student_id) and 
@@ -136,7 +136,7 @@ class ProfessorService:
                 if not defense_date or not internal_evaluator or not external_evaluator:
                     return False, "تاریخ دفاع و داوران باید مشخص شوند"
                 
-                # بررسی وجود داوران
+                
                 internal_prof = self.auth_service.get_user(internal_evaluator)
                 external_prof = self.auth_service.get_user(external_evaluator)
                 
@@ -145,20 +145,20 @@ class ProfessorService:
                 if not external_prof:
                     return False, "داور خارجی یافت نشد"
                 
-                # بررسی ظرفیت داوران
+               
                 if hasattr(internal_prof, 'can_accept_evaluation') and not internal_prof.can_accept_evaluation():
                     return False, "داور داخلی ظرفیت ندارد"
                 if hasattr(external_prof, 'can_accept_evaluation') and not external_prof.can_accept_evaluation():
                     return False, "داور خارجی ظرفیت ندارد"
                 
-                # تأیید درخواست
+                
                 requests_data[request_index]["status"] = "scheduled"
                 requests_data[request_index]["defense_date"] = defense_date
                 requests_data[request_index]["internal_evaluator"] = internal_evaluator
                 requests_data[request_index]["external_evaluator"] = external_evaluator
                 requests_data[request_index]["rejection_reason"] = None
                 
-                # افزایش ظرفیت داوران (اگر متد exists دارد)
+                
                 if hasattr(internal_prof, 'add_evaluation'):
                     internal_prof.add_evaluation()
                 if hasattr(external_prof, 'add_evaluation'):
@@ -166,7 +166,7 @@ class ProfessorService:
                     
                 message = "درخواست دفاع تأیید و برنامه‌ریزی شد"
             else:
-                # رد درخواست
+                
                 requests_data[request_index]["status"] = "rejected"
                 requests_data[request_index]["defense_date"] = None
                 requests_data[request_index]["internal_evaluator"] = None
@@ -174,7 +174,7 @@ class ProfessorService:
                 requests_data[request_index]["rejection_reason"] = rejection_reason
                 message = "درخواست دفاع رد شد"
             
-            # ذخیره تغییرات
+           
             with open(self.defense_requests_file, 'w', encoding='utf-8') as file:
                 json.dump(requests_data, file, ensure_ascii=False, indent=4)
             
@@ -186,16 +186,16 @@ class ProfessorService:
             print(f"خطای کامل: {traceback.format_exc()}")
             return False, f"خطا در پردازش درخواست دفاع: {str(e)}"
     def get_scheduled_defenses(self, professor_id):
-        """دریافت جلسات دفاع برنامه‌ریزی شده مربوط به استاد راهنما"""
+        
         try:
             with open(self.defense_requests_file, 'r', encoding='utf-8') as file:
                 requests_data = json.load(file)
             
-            # فیلتر کردن جلسات دفاع scheduled مربوط به استاد راهنما
+            
             scheduled_defenses = [
                 data for data in requests_data 
                 if data.get("status") == "scheduled" 
-                and data.get("professor_id") == professor_id  # استاد راهنما
+                and data.get("professor_id") == professor_id  
             ]
             
             return scheduled_defenses
@@ -203,9 +203,9 @@ class ProfessorService:
             return []
     def complete_defense_process(self, student_id, guidance_score, internal_score, external_score, 
                            attendees, defense_result):
-        """تکمیل فرآیند دفاع و ثبت نمرات"""
+        
         try:
-            # اعتبارسنجی نمره استاد راهنما
+            
             if guidance_score is None:
                 return False, "نمره استاد راهنما باید وارد شود"
             
@@ -214,18 +214,18 @@ class ProfessorService:
             except ValueError:
                 return False, "نمره استاد راهنما باید عددی باشد"
 
-            # خواندن درخواست‌های دفاع
+            
             with open(self.defense_requests_file, 'r', encoding='utf-8') as file:
                 defense_requests = json.load(file)
             
-            # خواندن پایان‌نامه‌ها
+            
             try:
                 with open(self.theses_file, 'r', encoding='utf-8') as file:
                     theses = json.load(file)
             except (FileNotFoundError, json.JSONDecodeError):
                 theses = []
             
-            # پیدا کردن درخواست دفاع
+            
             defense_index = -1
             for i, data in enumerate(defense_requests):
                 if str(data.get("student_id")) == str(student_id) and data.get("status") == "scheduled":
@@ -237,7 +237,7 @@ class ProfessorService:
             
             defense_data = defense_requests[defense_index]
             
-            # ایجاد رکورد پایان‌نامه
+            
             thesis_data = {
                 "student_id": defense_data["student_id"],
                 "professor_id": defense_data["professor_id"],
@@ -260,7 +260,7 @@ class ProfessorService:
                 "defense_result": defense_result
             }
             
-            # محاسبه نمره نهایی اگر همه نمرات موجود باشند
+           
             if (internal_score is not None and external_score is not None and
                 guidance_score is not None):
                 try:
@@ -272,13 +272,13 @@ class ProfessorService:
             else:
                 thesis_data["final_score"] = None
             
-            # اضافه کردن به لیست پایان‌نامه‌ها
+           
             theses.append(thesis_data)
             
-            # به روز کردن وضعیت درخواست دفاع
+            
             defense_requests[defense_index]["status"] = "completed"
             
-            # آزاد کردن ظرفیت اساتید
+           
             professor = self.auth_service.get_user(defense_data["professor_id"])
             internal_evaluator = self.auth_service.get_user(defense_data["internal_evaluator"])
             external_evaluator = self.auth_service.get_user(defense_data["external_evaluator"])
@@ -290,14 +290,14 @@ class ProfessorService:
             if external_evaluator:
                 external_evaluator.current_evaluation = max(0, external_evaluator.current_evaluation - 1)
             
-            # ذخیره تغییرات
+            
             with open(self.defense_requests_file, 'w', encoding='utf-8') as file:
                 json.dump(defense_requests, file, ensure_ascii=False, indent=4)
             
             with open(self.theses_file, 'w', encoding='utf-8') as file:
                 json.dump(theses, file, ensure_ascii=False, indent=4)
             
-            # ذخیره اطلاعات کاربران
+            
             self.auth_service.save_users()
             
             return True, "دفاع با موفقیت تکمیل و ثبت شد. نمرات داوران می‌توانند بعداً وارد شوند."

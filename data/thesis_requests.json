@@ -1,12 +1,11 @@
 [
-    
     {
-        "student_id": "98123456",
+        "student_id": "98123457",
         "course_id": "thesis101",
         "professor_id": "1001",
-        "request_date": "2025-04-29 23:32:17",
+        "request_date": "2025-05-12 20:30:56",
         "status": "approved",
-        "approval_date": "2025-04-29 23:32:58",
+        "approval_date": "2025-05-12 20:31:53",
         "rejection_reason": null
     }
 ]
